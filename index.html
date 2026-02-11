@@ -183,6 +183,8 @@ button:active {
 }
 .subquestion:last-child { border-bottom: none; }
 .opcoes-psqi { margin-top: 8px; }
+.whoqol-opcoes { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.whoqol-opcoes label { margin-right: 12px; }
 
 .resultado {
   margin-top: 30px;
@@ -350,6 +352,13 @@ button:active {
   </div>
 </div>
 
+<hr>
+
+<h2>WHOQOL-BREF – Qualidade de Vida (OMS)</h2>
+<p><strong>Instruções:</strong> Este questionário é sobre como você se sente a respeito de sua qualidade de vida, saúde e outras áreas de sua vida. Responda a todas as questões. Tenha em mente as <strong>últimas duas semanas</strong>. Escolha o número de 1 a 5 que melhor corresponde à sua resposta.</p>
+
+<div id="whoqol"></div>
+
 <button type="submit">Calcular Resultado</button>
 </form>
 
@@ -418,6 +427,35 @@ const phq9Perguntas = [
 "Pensamentos de que estaria melhor morto ou de se machucar"
 ];
 
+const whoqolPerguntas = [
+  "Como você avaliaria sua qualidade de vida? (1=muito ruim a 5=muito boa)",
+  "Quão satisfeito(a) você está com a sua saúde? (1=muito insatisfeito a 5=muito satisfeito)",
+  "Em que medida sua dor (física) impede você de fazer o que precisa? (1=nada a 5=extremamente)",
+  "O quanto você precisa de algum tratamento médico para levar sua vida diária? (1=nada a 5=extremamente)",
+  "O quanto você aproveita a vida? (1=nada a 5=extremamente)",
+  "Em que medida você acha que a sua vida tem sentido? (1=nada a 5=extremamente)",
+  "O quanto você consegue se concentrar? (1=nada a 5=extremamente)",
+  "O quanto você se sente em segurança em sua vida diária? (1=nada a 5=extremamente)",
+  "Quão saudável é o seu ambiente físico (clima, barulho, poluição, atrativos)? (1=nada a 5=extremamente)",
+  "Você tem energia suficiente para seu dia-a-dia? (1=nada a 5=completamente)",
+  "Você é capaz de aceitar sua aparência física? (1=nada a 5=completamente)",
+  "Você tem dinheiro suficiente para satisfazer suas necessidades? (1=nada a 5=completamente)",
+  "Quão disponíveis para você estão as informações que precisa no seu dia-a-dia? (1=nada a 5=completamente)",
+  "Em que medida você tem oportunidades de atividade de lazer? (1=nada a 5=completamente)",
+  "Quão bem você é capaz de se locomover? (1=muito ruim a 5=muito bom)",
+  "Quão satisfeito(a) você está com o seu sono? (1=muito insatisfeito a 5=muito satisfeito)",
+  "Quão satisfeito(a) você está com sua capacidade de desempenhar as atividades do seu dia-a-dia? (1=muito insatisfeito a 5=muito satisfeito)",
+  "Quão satisfeito(a) você está com sua capacidade para o trabalho? (1=muito insatisfeito a 5=muito satisfeito)",
+  "Quão satisfeito(a) você está consigo mesmo? (1=muito insatisfeito a 5=muito satisfeito)",
+  "Quão satisfeito(a) você está com suas relações pessoais (amigos, parentes, conhecidos, colegas)? (1=muito insatisfeito a 5=muito satisfeito)",
+  "Quão satisfeito(a) você está com sua vida sexual? (1=muito insatisfeito a 5=muito satisfeito)",
+  "Quão satisfeito(a) você está com o apoio que você recebe de seus amigos? (1=muito insatisfeito a 5=muito satisfeito)",
+  "Quão satisfeito(a) você está com as condições do local onde mora? (1=muito insatisfeito a 5=muito satisfeito)",
+  "Quão satisfeito(a) você está com o seu acesso aos serviços de saúde? (1=muito insatisfeito a 5=muito satisfeito)",
+  "Quão satisfeito(a) você está com o seu meio de transporte? (1=muito insatisfeito a 5=muito satisfeito)",
+  "Com que frequência você tem sentimentos negativos (mau humor, desespero, ansiedade, depressão)? (1=nunca a 5=sempre)"
+];
+
 function gerarQuestoes(lista, containerId, prefixo){
   const container = document.getElementById(containerId);
   lista.forEach((pergunta, i)=>{
@@ -443,6 +481,18 @@ function gerarOpcoesPSQI(namePrefix, required) {
   return html;
 }
 
+function gerarWhoqol() {
+  const container = document.getElementById("whoqol");
+  whoqolPerguntas.forEach((texto, i) => {
+    let html = `<div class="question"><label>${i + 1}. ${texto}</label><div class="whoqol-opcoes">`;
+    for (let v = 1; v <= 5; v++) {
+      html += `<label class="radio-row"><input type="radio" name="whoqol_${i}" value="${v}" required> ${v}</label>`;
+    }
+    html += "</div></div>";
+    container.innerHTML += html;
+  });
+}
+
 gerarQuestoes(gad7Perguntas,"gad7","g");
 gerarQuestoes(phq9Perguntas,"phq9","p");
 
@@ -455,6 +505,45 @@ document.getElementById("psqi8").innerHTML = gerarOpcoesPSQI("psqi8");
 document.getElementById("psqi10_extra").innerHTML = psqi10ExtraItens.map((titulo, i) =>
   `<div class="subquestion"><label>${titulo}</label><div class="opcoes-psqi">${gerarOpcoesPSQI("psqi10e_" + i, false)}</div></div>`
 ).join("");
+
+gerarWhoqol();
+
+function getWhoqolRespostas() {
+  return whoqolPerguntas.map((_, i) => {
+    const r = document.querySelector(`input[name="whoqol_${i}"]:checked`);
+    return r ? parseInt(r.value, 10) : null;
+  });
+}
+
+function calcularWHOQOL(respostas) {
+  if (!respostas || respostas.length < 26) return null;
+  const rev = (v) => 6 - v;
+  const f = (indices, reverseItems = []) => {
+    let sum = 0;
+    indices.forEach((idx, i) => {
+      const raw = respostas[idx - 1];
+      if (raw == null) return;
+      sum += reverseItems.includes(idx) ? rev(raw) : raw;
+    });
+    const n = indices.length;
+    return n > 0 ? ((sum - n) / (n * 4)) * 100 : 0;
+  };
+  const fisico = f([3, 4, 10, 15, 16, 17, 18], [3, 4]);
+  const psicologico = f([5, 6, 7, 11, 19, 26], [26]);
+  const social = f([20, 21, 22], []);
+  const ambiente = f([8, 9, 12, 13, 14, 23, 24, 25], []);
+  const qualidadeVidaGeral = respostas[0];
+  const satisfacaoSaude = respostas[1];
+  return {
+    fisico: Math.round(fisico),
+    psicologico: Math.round(psicologico),
+    social: Math.round(social),
+    ambiente: Math.round(ambiente),
+    qualidadeVidaGeral,
+    satisfacaoSaude,
+    respostas
+  };
+}
 
 function calcularPSQI() {
   const q1 = document.getElementById("psqi1").value;
@@ -540,6 +629,8 @@ document.getElementById("formulario").addEventListener("submit", function(e){
   }
 
   const psqi = calcularPSQI();
+  const whoqolRespostas = getWhoqolRespostas();
+  const whoqol = calcularWHOQOL(whoqolRespostas);
 
   dadosExportacao = {
     nome: document.getElementById("nome").value,
@@ -550,9 +641,16 @@ document.getElementById("formulario").addEventListener("submit", function(e){
     phqScore,
     riscoSuicidio,
     psqi,
+    whoqol,
     gadRespostas: gad7Perguntas.map((_, i) => document.querySelector(`input[name="g${i}"]:checked`)?.value),
     phqRespostas: phq9Perguntas.map((_, i) => document.querySelector(`input[name="p${i}"]:checked`)?.value)
   };
+
+  const whoqolHtml = whoqol ? `
+    <p><strong>WHOQOL-BREF:</strong></p>
+    <p style="font-size:14px;color:#666;">Qualidade de vida geral: ${whoqol.qualidadeVidaGeral}/5 | Satisfação com saúde: ${whoqol.satisfacaoSaude}/5</p>
+    <p style="font-size:14px;color:#666;">Domínio Físico: ${whoqol.fisico} | Psicológico: ${whoqol.psicologico} | Social: ${whoqol.social} | Meio ambiente: ${whoqol.ambiente} (escala 0-100)</p>
+  ` : "";
 
   document.getElementById("resultado").style.display = "block";
   document.getElementById("resultado").innerHTML = `
@@ -561,6 +659,7 @@ document.getElementById("formulario").addEventListener("submit", function(e){
     <p><strong>PHQ-9:</strong> ${phqScore} pontos – ${interpretacaoPHQ(phqScore)}</p>
     <p><strong>PSQI (Índice de Pittsburgh):</strong> ${psqi.global} pontos – ${interpretacaoPSQI(psqi.global)}</p>
     <p style="font-size:14px;color:#666;">Componentes: Qualidade subjetiva ${psqi.comp1} | Latência ${psqi.comp2} | Duração ${psqi.comp3} | Eficiência ${psqi.comp4} | Perturbações ${psqi.comp5} | Medicação ${psqi.comp6} | Disfunção diurna ${psqi.comp7}</p>
+    ${whoqolHtml}
     ${riscoSuicidio ? '<p class="alerta">⚠ Atenção: resposta positiva na questão 9 do PHQ-9. Avaliação profissional imediata é recomendada.</p>' : ''}
     <hr>
     <p><em>Este questionário é uma ferramenta de triagem e não substitui avaliação clínica profissional.</em></p>
@@ -603,6 +702,18 @@ document.getElementById("btnExportarExcel").addEventListener("click", function()
   phq9Perguntas.forEach((p, i) => {
     rows.push(["PHQ-9 Q" + (i + 1), d.phqRespostas[i] != null ? d.phqRespostas[i] : ""]);
   });
+
+  if (d.whoqol) {
+    rows.push(["WHOQOL Qualidade de vida geral", d.whoqol.qualidadeVidaGeral]);
+    rows.push(["WHOQOL Satisfação com saúde", d.whoqol.satisfacaoSaude]);
+    rows.push(["WHOQOL Domínio Físico (0-100)", d.whoqol.fisico]);
+    rows.push(["WHOQOL Domínio Psicológico (0-100)", d.whoqol.psicologico]);
+    rows.push(["WHOQOL Domínio Social (0-100)", d.whoqol.social]);
+    rows.push(["WHOQOL Domínio Meio ambiente (0-100)", d.whoqol.ambiente]);
+    (d.whoqol.respostas || []).forEach((v, i) => {
+      rows.push(["WHOQOL Q" + (i + 1), v != null ? v : ""]);
+    });
+  }
 
   const ws = XLSX.utils.aoa_to_sheet(rows);
   const wb = XLSX.utils.book_new();
