@@ -73,7 +73,20 @@ input[type="text"], input[type="tel"] {
   transition: border-color 0.3s ease;
 }
 
-input[type="text"]:focus, input[type="tel"]:focus {
+input[type="number"], input[type="time"], input[type="date"] {
+  width: 100%;
+  max-width: 200px;
+  padding: 12px;
+  margin-top: 5px;
+  margin-bottom: 15px;
+  border-radius: 6px;
+  border: 2px solid #ddd;
+  font-size: 15px;
+  transition: border-color 0.3s ease;
+}
+
+input[type="text"]:focus, input[type="tel"]:focus,
+input[type="number"]:focus, input[type="time"]:focus, input[type="date"]:focus {
   outline: none;
   border-color: #0066cc;
   box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
@@ -147,6 +160,29 @@ button:hover {
 button:active {
   transform: translateY(0);
 }
+
+.btn-secondary {
+  background: #28a745;
+  margin-top: 0;
+}
+
+.btn-secondary:hover {
+  background: #218838;
+}
+
+.radio-row {
+  display: flex;
+  align-items: center;
+  margin: 8px 0;
+}
+
+.subquestion {
+  margin: 15px 0;
+  padding: 10px 0;
+  border-bottom: 1px solid #eee;
+}
+.subquestion:last-child { border-bottom: none; }
+.opcoes-psqi { margin-top: 8px; }
 
 .resultado {
   margin-top: 30px;
@@ -227,8 +263,14 @@ button:active {
 
 <form id="formulario">
 
-<label>Nome do Usuário</label>
+<label>Nome</label>
 <input type="text" id="nome" required>
+
+<label>Idade</label>
+<input type="number" id="idade" min="1" max="120" required>
+
+<label>Data</label>
+<input type="date" id="data" required>
 
 <label>Celular</label>
 <input type="tel" id="celular" required>
@@ -247,18 +289,111 @@ button:active {
 
 <div id="phq9"></div>
 
+<hr>
+
+<h2>Índice da Qualidade do Sono de Pittsburgh (PSQI)</h2>
+<p>As seguintes perguntas são relativas aos seus hábitos de sono durante o último mês somente. Suas respostas devem indicar a lembrança mais exata da maioria dos dias e noites do último mês. Por favor, responda a todas as perguntas.</p>
+
+<div id="psqi">
+  <div class="question">
+    <label>1. Durante o último mês, quando você geralmente foi para a cama à noite?</label>
+    <label>Hora usual de deitar:</label>
+    <input type="time" id="psqi1" required>
+  </div>
+  <div class="question">
+    <label>2. Durante o último mês, quanto tempo (em minutos) você geralmente levou para dormir à noite?</label>
+    <input type="number" id="psqi2" min="0" max="300" placeholder="minutos" required>
+  </div>
+  <div class="question">
+    <label>3. Durante o último mês, quando você geralmente levantou de manhã?</label>
+    <label>Hora usual de levantar:</label>
+    <input type="time" id="psqi3" required>
+  </div>
+  <div class="question">
+    <label>4. Durante o último mês, quantas horas de sono você teve por noite?</label>
+    <input type="number" id="psqi4" min="0" max="24" step="0.5" placeholder="horas" required>
+  </div>
+  <div class="question">
+    <label>5. Durante o último mês, com que frequência você teve dificuldade para dormir porque você:</label>
+    <div id="psqi5"></div>
+  </div>
+  <div class="question">
+    <label>6. Durante o último mês, como você classificaria a qualidade do seu sono de uma maneira geral?</label>
+    <label class="radio-row"><input type="radio" name="psqi6" value="0" required> Muito boa</label>
+    <label class="radio-row"><input type="radio" name="psqi6" value="1"> Boa</label>
+    <label class="radio-row"><input type="radio" name="psqi6" value="2"> Ruim</label>
+    <label class="radio-row"><input type="radio" name="psqi6" value="3"> Muito ruim</label>
+  </div>
+  <div class="question">
+    <label>7. Durante o último mês, com que frequência você tomou medicamento (prescrito ou por conta própria) para lhe ajudar a dormir?</label>
+    <div id="psqi7"></div>
+  </div>
+  <div class="question">
+    <label>8. No último mês, com que frequência você teve dificuldade para ficar acordado enquanto dirigia, comia ou participava de uma atividade social?</label>
+    <div id="psqi8"></div>
+  </div>
+  <div class="question">
+    <label>9. Durante o último mês, quão problemático foi para você manter o entusiasmo (ânimo) para fazer as coisas?</label>
+    <label class="radio-row"><input type="radio" name="psqi9" value="0" required> Nenhuma dificuldade</label>
+    <label class="radio-row"><input type="radio" name="psqi9" value="1"> Um problema leve</label>
+    <label class="radio-row"><input type="radio" name="psqi9" value="2"> Um problema razoável</label>
+    <label class="radio-row"><input type="radio" name="psqi9" value="3"> Um grande problema</label>
+  </div>
+  <div class="question">
+    <label>10. Você tem um parceiro(a), esposo(a) ou colega de quarto?</label>
+    <label class="radio-row"><input type="radio" name="psqi10" value="A" required> Não</label>
+    <label class="radio-row"><input type="radio" name="psqi10" value="B"> Parceiro ou colega, mas em outro quarto</label>
+    <label class="radio-row"><input type="radio" name="psqi10" value="C"> Parceiro no mesmo quarto, mas em outra cama</label>
+    <label class="radio-row"><input type="radio" name="psqi10" value="D"> Parceiro na mesma cama</label>
+    <p style="margin-top:15px;">Se você tem parceiro ou colega de quarto, com que frequência no último mês você apresentou:</p>
+    <div id="psqi10_extra"></div>
+  </div>
+</div>
+
 <button type="submit">Calcular Resultado</button>
 </form>
 
 <div id="resultado" class="resultado" style="display:none;"></div>
+<div id="exportArea" style="display:none; margin-top:15px;">
+  <button type="button" id="btnExportarExcel" class="btn-secondary">Exportar para Excel</button>
+</div>
 </div>
 
+<script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 <script>
 const opcoes = [
   {texto:"De jeito nenhum", valor:0},
   {texto:"Vários dias", valor:1},
   {texto:"Mais da metade dos dias", valor:2},
   {texto:"Quase todos os dias", valor:3}
+];
+
+const opcoesPSQI = [
+  {texto:"Nenhuma no último mês", valor:0},
+  {texto:"Menos de uma vez por semana", valor:1},
+  {texto:"Uma ou duas vezes por semana", valor:2},
+  {texto:"Três ou mais vezes na semana", valor:3}
+];
+
+const psqi5Itens = [
+  "A) Não conseguiu adormecer em até 30 minutos",
+  "B) Acordou no meio da noite ou de manhã cedo",
+  "C) Precisou levantar para ir ao banheiro",
+  "D) Não conseguiu respirar confortavelmente",
+  "E) Tossiu ou roncou forte",
+  "F) Sentiu muito frio",
+  "G) Sentiu muito calor",
+  "H) Teve sonhos ruins",
+  "I) Teve dor",
+  "J) Outras razões (descreva no campo ao lado)"
+];
+
+const psqi10ExtraItens = [
+  "E) Ronco forte",
+  "F) Longas paradas de respiração enquanto dormia",
+  "G) Contrações ou puxões de pernas enquanto dormia",
+  "H) Episódios de desorientação ou confusão durante o sono",
+  "I) Outras alterações (inquietações) enquanto você dorme"
 ];
 
 const gad7Perguntas = [
@@ -299,8 +434,78 @@ function gerarQuestoes(lista, containerId, prefixo){
   });
 }
 
+function gerarOpcoesPSQI(namePrefix, required) {
+  const req = required !== false ? " required" : "";
+  let html = "";
+  opcoesPSQI.forEach((op) => {
+    html += `<label class="radio-row"><input type="radio" name="${namePrefix}" value="${op.valor}"${req}> ${op.texto}</label>`;
+  });
+  return html;
+}
+
 gerarQuestoes(gad7Perguntas,"gad7","g");
 gerarQuestoes(phq9Perguntas,"phq9","p");
+
+document.getElementById("psqi5").innerHTML = psqi5Itens.map((titulo, i) =>
+  `<div class="subquestion"><label>${titulo}</label><div class="opcoes-psqi">${gerarOpcoesPSQI("psqi5_" + i)}</div>${i === 9 ? '<input type="text" id="psqi5j_outro" placeholder="Descreva outras razões" style="margin-top:5px;max-width:100%;">' : ''}</div>`
+).join("");
+
+document.getElementById("psqi7").innerHTML = gerarOpcoesPSQI("psqi7");
+document.getElementById("psqi8").innerHTML = gerarOpcoesPSQI("psqi8");
+document.getElementById("psqi10_extra").innerHTML = psqi10ExtraItens.map((titulo, i) =>
+  `<div class="subquestion"><label>${titulo}</label><div class="opcoes-psqi">${gerarOpcoesPSQI("psqi10e_" + i, false)}</div></div>`
+).join("");
+
+function calcularPSQI() {
+  const q1 = document.getElementById("psqi1").value;
+  const q2 = parseInt(document.getElementById("psqi2").value, 10) || 0;
+  const q3 = document.getElementById("psqi3").value;
+  const q4 = parseFloat(document.getElementById("psqi4").value) || 0;
+  const q6 = parseInt(document.querySelector('input[name="psqi6"]:checked')?.value || 0, 10);
+  const q7 = parseInt(document.querySelector('input[name="psqi7"]:checked')?.value || 0, 10);
+  const q8 = parseInt(document.querySelector('input[name="psqi8"]:checked')?.value || 0, 10);
+  const q9 = parseInt(document.querySelector('input[name="psqi9"]:checked')?.value || 0, 10);
+
+  let sum5 = 0;
+  for (let i = 0; i < 10; i++) {
+    const r = document.querySelector('input[name="psqi5_' + i + '"]:checked');
+    sum5 += r ? parseInt(r.value, 10) : 0;
+  }
+  const comp5 = sum5 <= 0 ? 0 : sum5 <= 9 ? 1 : sum5 <= 18 ? 2 : 3;
+
+  const [h1, m1] = q1.split(":").map(Number);
+  const [h3, m3] = q3.split(":").map(Number);
+  let minBed = (h3 * 60 + m3) - (h1 * 60 + m1);
+  if (minBed <= 0) minBed += 24 * 60;
+  const efficiency = minBed > 0 ? (q4 * 60 / minBed) * 100 : 0;
+  const comp4 = efficiency >= 85 ? 0 : efficiency >= 75 ? 1 : efficiency >= 65 ? 2 : 3;
+
+  const comp1 = q6;
+  const comp2lat = q2 <= 15 ? 0 : q2 <= 30 ? 1 : q2 <= 60 ? 2 : 3;
+  const q5a = parseInt(document.querySelector('input[name="psqi5_0"]:checked')?.value || 0, 10);
+  const sum2 = comp2lat + q5a;
+  const comp2 = sum2 === 0 ? 0 : sum2 <= 2 ? 1 : sum2 <= 4 ? 2 : 3;
+  const comp3 = q4 > 7 ? 0 : q4 >= 6 ? 1 : q4 >= 5 ? 2 : 3;
+  const comp6 = q7;
+  const comp7sum = q8 + q9;
+  const comp7 = comp7sum === 0 ? 0 : comp7sum <= 2 ? 1 : comp7sum <= 4 ? 2 : 3;
+
+  const global = comp1 + comp2 + comp3 + comp4 + comp5 + comp6 + comp7;
+  return {
+    comp1, comp2, comp3, comp4, comp5, comp6, comp7,
+    global,
+    q1, q2, q3, q4, q6, q7, q8, q9,
+    sum5, efficiency: efficiency.toFixed(1)
+  };
+}
+
+function interpretacaoPSQI(global) {
+  if (global <= 5) return "Boa qualidade do sono";
+  if (global <= 10) return "Qualidade do sono prejudicada";
+  return "Má qualidade do sono";
+}
+
+let dadosExportacao = null;
 
 document.getElementById("formulario").addEventListener("submit", function(e){
   e.preventDefault();
@@ -334,15 +539,76 @@ document.getElementById("formulario").addEventListener("submit", function(e){
     return "Depressão grave";
   }
 
+  const psqi = calcularPSQI();
+
+  dadosExportacao = {
+    nome: document.getElementById("nome").value,
+    idade: document.getElementById("idade").value,
+    data: document.getElementById("data").value,
+    celular: document.getElementById("celular").value,
+    gadScore,
+    phqScore,
+    riscoSuicidio,
+    psqi,
+    gadRespostas: gad7Perguntas.map((_, i) => document.querySelector(`input[name="g${i}"]:checked`)?.value),
+    phqRespostas: phq9Perguntas.map((_, i) => document.querySelector(`input[name="p${i}"]:checked`)?.value)
+  };
+
   document.getElementById("resultado").style.display = "block";
   document.getElementById("resultado").innerHTML = `
     <h3>Resultado</h3>
     <p><strong>GAD-7:</strong> ${gadScore} pontos – ${interpretacaoGAD(gadScore)}</p>
     <p><strong>PHQ-9:</strong> ${phqScore} pontos – ${interpretacaoPHQ(phqScore)}</p>
+    <p><strong>PSQI (Índice de Pittsburgh):</strong> ${psqi.global} pontos – ${interpretacaoPSQI(psqi.global)}</p>
+    <p style="font-size:14px;color:#666;">Componentes: Qualidade subjetiva ${psqi.comp1} | Latência ${psqi.comp2} | Duração ${psqi.comp3} | Eficiência ${psqi.comp4} | Perturbações ${psqi.comp5} | Medicação ${psqi.comp6} | Disfunção diurna ${psqi.comp7}</p>
     ${riscoSuicidio ? '<p class="alerta">⚠ Atenção: resposta positiva na questão 9 do PHQ-9. Avaliação profissional imediata é recomendada.</p>' : ''}
     <hr>
     <p><em>Este questionário é uma ferramenta de triagem e não substitui avaliação clínica profissional.</em></p>
   `;
+  document.getElementById("exportArea").style.display = "block";
+});
+
+document.getElementById("btnExportarExcel").addEventListener("click", function() {
+  if (!dadosExportacao || typeof XLSX === "undefined") return;
+  const d = dadosExportacao;
+  const psqi = d.psqi;
+
+  const rows = [
+    ["Campo", "Valor"],
+    ["Nome", d.nome],
+    ["Idade", d.idade],
+    ["Data", d.data],
+    ["Celular", d.celular],
+    ["GAD-7 total", d.gadScore],
+    ["PHQ-9 total", d.phqScore],
+    ["Risco suicídio (PHQ-9 item 9)", d.riscoSuicidio ? "Sim" : "Não"],
+    ["PSQI total", psqi.global],
+    ["PSQI Componente 1 (qualidade)", psqi.comp1],
+    ["PSQI Componente 2 (latência)", psqi.comp2],
+    ["PSQI Componente 3 (duração)", psqi.comp3],
+    ["PSQI Componente 4 (eficácia)", psqi.comp4],
+    ["PSQI Componente 5 (perturbações)", psqi.comp5],
+    ["PSQI Componente 6 (medicação)", psqi.comp6],
+    ["PSQI Componente 7 (disfunção diurna)", psqi.comp7],
+    ["PSQI Hora deitar", psqi.q1],
+    ["PSQI Minutos para dormir", psqi.q2],
+    ["PSQI Hora levantar", psqi.q3],
+    ["PSQI Horas de sono", psqi.q4],
+    ["PSQI Eficiência %", psqi.efficiency]
+  ];
+
+  gad7Perguntas.forEach((p, i) => {
+    rows.push(["GAD-7 Q" + (i + 1), d.gadRespostas[i] != null ? d.gadRespostas[i] : ""]);
+  });
+  phq9Perguntas.forEach((p, i) => {
+    rows.push(["PHQ-9 Q" + (i + 1), d.phqRespostas[i] != null ? d.phqRespostas[i] : ""]);
+  });
+
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Avaliação");
+  const nomeArquivo = "avaliacao_" + (d.nome || "paciente").replace(/\s+/g, "_") + "_" + (d.data || "") + ".xlsx";
+  XLSX.writeFile(wb, nomeArquivo);
 });
 </script>
 
